@@ -33,12 +33,20 @@ public class DSNWriter extends JFrame {
 	private String _SalesArea = "CN";
 	private String _Interface = "Uart";
 
+	private static final int CommPort = 6000;
+	private static final String CommIP = "192.168.4.1";
+
 	/* 串口连接 */
 	private JPanel ComPanel = new JPanel();
 	private JComboBox<String> srSelect = new JComboBox<String>();
 	private JComboBox<String> srBaudSet = new JComboBox<String>();
 	private final String[] srBaudRate = {"9600", "57600", "115200", "230400"};
 	private JButton OpenPortBtn = new JButton("连接");
+	/* wifi */
+	private JLabel ip_lab = new JLabel("IP:");
+	private JTextField IP_Txt = new JTextField(CommIP);
+	private JLabel port_lab = new JLabel("port:");
+	private JTextField Port_Txt = new JTextField("6000");
 	/* 主面板 */
 	private JPanel MainPanel = new JPanel();
 
@@ -84,6 +92,7 @@ public class DSNWriter extends JFrame {
 		ItemAreaEU = new JCheckBoxMenuItem("欧洲", _SalesArea.equals("EU"));
 		ItemAreaAA = new JCheckBoxMenuItem("北美", _SalesArea.equals("AA"));
 
+		ItemUart.addActionListener(ifl); ItemWifi.addActionListener(ifl);
 		ItemDroneF1.addActionListener(dtl); ItemDroneF2.addActionListener(dtl);
 		ItemAreaCN.addActionListener(sal); ItemAreaEU.addActionListener(sal); ItemAreaAA.addActionListener(sal);
 		SwingUtilities.invokeLater(new Runnable() {
@@ -136,30 +145,51 @@ public class DSNWriter extends JFrame {
 
 				ComPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
 				ComPanel.setBackground(new Color(233, 80, 80, 160));
+				/* Uart */
+				srSelect.setPreferredSize(new Dimension(90, 30));
+				srSelect.setFont(srSelect.getFont().deriveFont(Font.BOLD, 14));
+				srSelect.setToolTipText("select com port");
+
+				srBaudSet.setPreferredSize(new Dimension(90, 30));
+				srBaudSet.setMaximumRowCount(5);
+				srBaudSet.setEditable(false);
+				for(String s : srBaudRate)
+					srBaudSet.addItem(s);
+				srBaudSet.setSelectedIndex(2);//default: 115200
+				srBaudSet.setFont(srBaudSet.getFont().deriveFont(Font.BOLD, 14));
+				srBaudSet.setToolTipText("set baudrate");
+
+				OpenPortBtn.setPreferredSize(new Dimension(90, 30));
+				OpenPortBtn.setFont(new Font("宋体", Font.BOLD, 18));
+//				OpenPortBtn.addActionListener(sbl);
+				OpenPortBtn.setToolTipText("open com port");
+				/* Wifi */
+				ip_lab.setPreferredSize(new Dimension(28, 30));
+				ip_lab.setFont(ip_lab.getFont().deriveFont(Font.ITALIC, 18));
+
+				IP_Txt.setPreferredSize(new Dimension(130, 30));
+				IP_Txt.setFont(new Font("Courier New", Font.BOLD, 18));
+				IP_Txt.setToolTipText("IP Address");
+				IP_Txt.setHorizontalAlignment(JTextField.CENTER);
+				IP_Txt.setEditable(false);
+
+				port_lab.setPreferredSize(new Dimension(45, 30));
+				port_lab.setFont(ip_lab.getFont().deriveFont(Font.ITALIC, 18));
+
+				Port_Txt.setPreferredSize(new Dimension(50, 30));
+				Port_Txt.setFont(new Font("Courier New", Font.BOLD, 18));
+				Port_Txt.setToolTipText("UDP Port");
+				Port_Txt.setHorizontalAlignment(JTextField.CENTER);
+				Port_Txt.setEditable(false);
 				if(_Interface.equals("Uart")) {
-					srSelect.setPreferredSize(new Dimension(90, 30));
-					srSelect.setFont(srSelect.getFont().deriveFont(Font.BOLD, 14));
-					srSelect.setToolTipText("select com port");
-
-					srBaudSet.setPreferredSize(new Dimension(90, 30));
-					srBaudSet.setMaximumRowCount(5);
-					srBaudSet.setEditable(false);
-					for(String s : srBaudRate)
-						srBaudSet.addItem(s);
-					srBaudSet.setSelectedIndex(2);//default: 115200
-					srBaudSet.setFont(srBaudSet.getFont().deriveFont(Font.BOLD, 14));
-					srBaudSet.setToolTipText("set baudrate");
-
-					OpenPortBtn.setPreferredSize(new Dimension(90, 30));
-					OpenPortBtn.setFont(new Font("宋体", Font.BOLD, 18));
-//					OpenPortBtn.addActionListener(sbl);
-					OpenPortBtn.setToolTipText("open com port");
-
 					ComPanel.add(srSelect);
 					ComPanel.add(srBaudSet);
 					ComPanel.add(OpenPortBtn);
-				} else {
-					
+				} else if(_Interface.equals("Wifi")) {
+					ComPanel.add(ip_lab);
+					ComPanel.add(IP_Txt);
+					ComPanel.add(port_lab);
+					ComPanel.add(Port_Txt);
 				}
 				add(ComPanel, BorderLayout.NORTH);
 				MainPanel.setLayout(new GridLayout(3, 1));
@@ -184,6 +214,35 @@ public class DSNWriter extends JFrame {
 		});
 	}
 
+	private ActionListener ifl = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			if(ItemUart.isSelected()) _Interface = "Uart";
+			if(ItemWifi.isSelected()) _Interface =  "Wifi";
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					if(_Interface.equals("Uart")) {
+						ComPanel.removeAll();
+
+						ComPanel.add(srSelect);
+						ComPanel.add(srBaudSet);
+						ComPanel.add(OpenPortBtn);
+						repaint();
+						ComPanel.validate();
+					} else if(_Interface.equals("Wifi")) {
+						ComPanel.removeAll();
+		
+						ComPanel.add(ip_lab);
+						ComPanel.add(IP_Txt);
+						ComPanel.add(port_lab);
+						ComPanel.add(Port_Txt);
+						repaint();
+						ComPanel.validate();
+					}
+				}
+			});
+			pref.put("_dsn_Interface", _Interface);
+		}
+	};
 	private ActionListener dtl = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 			if(ItemDroneF1.isSelected()) _DroneType = "F1";
