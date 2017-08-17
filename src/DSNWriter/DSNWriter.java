@@ -699,6 +699,12 @@ public class DSNWriter extends JFrame {
 				| UnsupportedLookAndFeelException e) {
 			e.printStackTrace();
 		}
+		Preferences p = Preferences.userRoot().node("/common");
+		String allow = p.get("_dsn_allowed", "");
+		if(!allow.equals("kyChuPermitted")) {
+			JOptionPane.showMessageDialog(null, "抱歉，此电脑未获得序列号写入许可！", "错误！", JOptionPane.ERROR_MESSAGE);
+			System.exit(0);
+		}
 		new DSNWriter();
 	}
 }
