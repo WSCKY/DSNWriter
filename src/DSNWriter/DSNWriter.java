@@ -574,7 +574,7 @@ public class DSNWriter extends JFrame {
 					}
 				}
 			});
-			pref.put("_baro_Interface", _Interface);
+			pref.put("_dsn_Interface", _Interface);
 		}
 	};
 	private ActionListener dtl = new ActionListener() {
